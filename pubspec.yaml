@@ -17,6 +17,7 @@ dev_dependencies:
   get: ^4.7.2
   google_fonts: ^6.2.1
   flutter_animate: ^4.5.2
+  flutter_secure_storage: ^9.2.4
 
 flutter:
   uses-material-design: true

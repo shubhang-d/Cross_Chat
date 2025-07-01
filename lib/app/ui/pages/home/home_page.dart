@@ -1,12 +1,12 @@
-import 'package:cross_chat_app/app/controllers/home_controller.dart'; // Import controller
-import 'package:cross_chat_app/app/ui/pages/chat/chat_page.dart';     // Import ChatPage
+import 'package:cross_chat_app/app/controllers/home_controller.dart';
+import 'package:cross_chat_app/app/ui/pages/chat/chat_page.dart';
+import 'package:cross_chat_app/app/ui/pages/settings/settings_page.dart'; // Import SettingsPage
 import 'package:cross_chat_app/app/ui/theme/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; // Import GetX
+import 'package:get/get.dart';
 import 'widgets/chat_list_view.dart';
 import 'widgets/sidebar.dart';
 
-// Make it a GetView to access the controller
 class HomePage extends GetView<HomeController> {
   const HomePage({Key? key}) : super(key: key);
 
@@ -16,44 +16,64 @@ class HomePage extends GetView<HomeController> {
       body: Row(
         children: [
           const Sidebar(),
-          Container(
-            width: 350,
-            color: AppColors.surface,
-            child: Column(
-              children: [
-                _buildChatListHeader(),
-                const Expanded(child: ChatListView()),
-              ],
-            ),
-          ),
 
           // --- MODIFICATION START ---
-          // Pane 3: Main Chat View (Now Dynamic)
+          // This Expanded widget will now build its child based on the selected nav item.
           Expanded(
             child: Obx(() {
-              // Check if a chat is selected
-              final selectedIndex = controller.selectedChatIndex.value;
-              if (selectedIndex >= 0 && selectedIndex < controller.chats.length) {
-                final selectedChat = controller.chats[selectedIndex];
-                // Use a ValueKey to ensure Flutter rebuilds the ChatPage
-                // and its controller when the user switches chats.
-                return ChatPage(
-                  key: ValueKey(selectedChat.name), // CRUCIAL for state management
-                  chat: selectedChat,
+              // Show SettingsPage if the settings icon (index 2) is selected
+              if (controller.selectedNavIndex.value == 2) {
+                return const SettingsPage();
+              }
+              // Otherwise, show the default chat layout
+              else {
+                return Row(
+                  children: [
+                    _buildChatListPane(),
+                    _buildChatViewPane(),
+                  ],
                 );
-              } else {
-                // Show the placeholder if no chat is selected
-                return _buildPlaceholder();
               }
             }),
-          )
+          ),
           // --- MODIFICATION END ---
         ],
       ),
     );
   }
+  
+  // Extracted chat list pane into its own method for clarity
+  Widget _buildChatListPane() {
+    return Container(
+      width: 350,
+      color: AppColors.surface,
+      child: Column(
+        children: [
+          _buildChatListHeader(),
+          const Expanded(child: ChatListView()),
+        ],
+      ),
+    );
+  }
 
-  // Extracted the placeholder to a separate method for cleanliness
+  // Extracted chat view pane into its own method
+  Widget _buildChatViewPane() {
+    return Expanded(
+      child: Obx(() {
+        final selectedIndex = controller.selectedChatIndex.value;
+        if (selectedIndex >= 0 && selectedIndex < controller.chats.length) {
+          final selectedChat = controller.chats[selectedIndex];
+          return ChatPage(
+            key: ValueKey(selectedChat.name),
+            chat: selectedChat,
+          );
+        } else {
+          return _buildPlaceholder();
+        }
+      }),
+    );
+  }
+
   Widget _buildPlaceholder() {
     return Container(
       decoration: const BoxDecoration(
